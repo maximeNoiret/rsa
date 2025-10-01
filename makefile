@@ -1,14 +1,13 @@
-rsa: main.o terminalManagement.o rsa.o
-	g++ -o rsa main.o terminalManagement.o rsa.o -lgmp -lgmpxx
+CXX = g++
+LDFLAGS = -lgmp -lgmpxx
+CXXFLAGS = -Wall -Wextra -std=c++17
+TARGET = rsa
 
-main.o: main.cpp
-	g++ -c main.cpp
+$(TARGET): main.o terminalManagement.o rsa.o
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-rsa.o: rsa.cpp terminalManagement.o
-	g++ -c rsa.cpp
-
-terminalManagement.o: terminalManagement.cpp
-	g++ -c terminalManagement.cpp
+%.o: %.cpp
+	$(CXX) $(CXXGLAGS) -c $< -o $@
 
 clean:
-	rm *.o rsa
+	rm *.o $(TARGET)

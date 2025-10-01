@@ -33,8 +33,9 @@ string mpz_to_string(const mpz_class &num) {
   return result;
 }
 
+// PS: might place each large section into its own function. dunno
 void generateKeys(const unsigned &bits, const string &filename) {
-  mpz_class p, q, n, phi, e, k, c, m;
+  mpz_class p, q, n, phi, e, k;
 
   // init random
   printStep(1, "Initializing random number generator.");
@@ -57,12 +58,17 @@ void generateKeys(const unsigned &bits, const string &filename) {
 
   // get public key
   // generate e a random GCD(phi, e) = 1
-  printStep(4, "Generating public key. Attempts:");
-  do {
-    mpz_urandomb(e.get_mpz_t(), state, bits);
-    showAttempt();
-  } while (gcd(phi, e) != 1);
-  printNewLine();
+  printStep(4, "Using exponent 65537.");
+  e = 65537;
+  if (gcd(phi, e) != 1) {
+    printVeryRareEvent();
+    do {
+      mpz_urandomb(e.get_mpz_t(), state, 17);
+      if (e % 2 == 0) ++e;
+      showAttempt();
+    } while (gcd(phi, e) != 1);
+    printNewLine();
+  }
 
   // get private key
   // generate invert of e
@@ -76,14 +82,44 @@ void generateKeys(const unsigned &bits, const string &filename) {
   // store public key
   printStep(6, "Saving keys to files.");
   ofstream file(filename + ".pub");
+  // TODO: file checking
+  file << n.get_str(16) << '\n';
   file << e.get_str(16);
   file.close();
 
   // store private key
   file.open(filename);
+  // TODO: file checking
+  file << n.get_str(16) << '\n';
   file << k.get_str(16);
   file.close();
 
   printFinishedKeygen(filename);
   return;
 }
+
+void encrypt(const std::string &filename, const std::string &message){
+  // Consider making a separate functon to load keys
+  ifstream file(filename);
+  if (!file.is_open()) {
+    printFileError(filename);
+    return;
+  }
+
+  mpz_class n, e, m, r;
+  {string tmp;
+    getline(file, tmp);
+    n.set_str(tmp, 16);
+    getline(file, tmp);
+    e.set_str(tmp, 16);}
+  file.close();
+
+  m = string_to_mpz(message);
+  mpz_powm(r.get_mpz_t(), m.get_mpz_t(), e.get_mpz_t(), n.get_mpz_t());
+  printCipher(r.get_str(16));
+
+  return;
+}
+
+void decrypt(const std::string &filename, const std::string &cipher);
+

@@ -8,4 +8,8 @@ std::string mpz_to_string(const mpz_class &num);
 
 void generateKeys(const unsigned &bits, const std::string &filename);
 
+void encrypt(const std::string &filename, const std::string &message);
+
+void decrypt(const std::string &filename, const std::string &cipher);
+
 #endif

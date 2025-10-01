@@ -80,6 +80,12 @@ void printStep(const unsigned &step, const string &message) {
   cout << setw(3) << right << step << setw(3) << left << '.' << message << '\n';
 }
 
+void printVeryRareEvent() {
+  cout << "Something very rare happened!" << '\n'
+       << "Exponent (65537) wasn't prime with phi of n!" << '\n'
+       << "Attempting to generate exponent with 17 bits:" << '\n';
+}
+
 void printNewLine() { cout << '\n'; }
 
 void showAttempt() { cout << '|'; }
@@ -88,3 +94,9 @@ void printFinishedKeygen(const string &filename) {
   cout << "Finished generating key pair." << '\n'
        << "Saved into " << filename << ".pub and " << filename << '\n';
 }
+
+void printFileError(const string &filename) {
+  cerr << "Error: Could not open file " << filename << "\n";
+}
+
+void printCipher(const string &cipher) { cout << cipher << '\n'; }
