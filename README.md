@@ -1,12 +1,39 @@
-# rsa
-RSA encryption to practice it idk
+# RSA Encryption
 
-# installing from source
-```
-$ git clone https://github.com/maximeNoiret/rsa
-$ cd rsa
-$ make
+RSA encryption implementation to practice it idk
 
-Optional: adding it to PATH
-# mv rsa /usr/bin
+## Requirements
+- Linux/macOS
+- GMP library
+- C++17 compiler
+
+## Installation
+```bash
+sudo pacman -S gmp
+
+make
 ```
+
+## Usage
+```bash
+# Generate keys
+./rsa keygen [bits] [filename]
+
+# Encrypt
+./rsa encrypt <keyfile.pub> <message>
+
+# Decrypt
+./rsa decrypt <keyfile> <ciphertext>
+```
+
+## Windows Support
+lol no, use WSL or, better yet, install Linux.
+
+## Features
+- Supports up to 16384-bit keys (maybe more)
+- PKCS#1 v1.5 padding
+- File chunking for large messages
+- Proper key generation with 65537 as default public exponent
+
+## Note
+This is a learning project. Don't use this for anything important unless you enjoy living dangerously.

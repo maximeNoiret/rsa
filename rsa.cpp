@@ -1,6 +1,7 @@
 #include <fstream>
 #include <gmp.h>
 #include <gmpxx.h>
+#include <thread>
 
 #include <iostream> // used for debug, will be removed.
 #include <iomanip>
@@ -39,21 +40,33 @@ string mpz_to_string(const mpz_class &num) {
   return result;
 }
 
+void generatePrime(mpz_class &x, const unsigned &bits, gmp_randstate_t &state) {
+  mpz_urandomb(x.get_mpz_t(), state, bits);
+  mpz_setbit(x.get_mpz_t(), bits - 1);  // ensure high bit set
+  mpz_setbit(x.get_mpz_t(), 0);         // ensure odd
+  mpz_nextprime(x.get_mpz_t(), x.get_mpz_t());
+}
+
 // PS: might place each large section into its own function. dunno
 void generateKeys(const unsigned &bits, const string &filename) {
   mpz_class p, q, n, phi, e, k;
 
   printStep(1, "Initializing random number generator.");
-  gmp_randstate_t state;
-  gmp_randinit_mt(state);
-  gmp_randseed_ui(state, time(NULL));
+  gmp_randstate_t statep, stateq;
+  gmp_randinit_mt(statep);
+  gmp_randinit_mt(stateq);
+  gmp_randseed_ui(statep, time(NULL));
+  gmp_randseed_ui(stateq, time(NULL) + 12345);
 
   printStep(2, "Generating random primes.");
-  mpz_urandomb(p.get_mpz_t(), state, bits);
-  mpz_nextprime(p.get_mpz_t(), p.get_mpz_t());
+  thread tp(generatePrime, ref(p), ref(bits), ref(statep));
+  thread tq(generatePrime, ref(q), ref(bits), ref(stateq));
 
-  mpz_urandomb(q.get_mpz_t(), state, bits);
-  mpz_nextprime(q.get_mpz_t(), q.get_mpz_t());
+  tp.join();
+  tq.join();
+  
+
+  gmp_randclear(stateq);
 
   printStep(3, "Calculating modulus and phi.");
   n = p * q;
@@ -64,17 +77,17 @@ void generateKeys(const unsigned &bits, const string &filename) {
   if (gcd(phi, e) != 1) {
     printVeryRareEvent();
     do {
-      mpz_urandomb(e.get_mpz_t(), state, 17);
+      mpz_urandomb(e.get_mpz_t(), statep, 17);
       if (e % 2 == 0) ++e;
       showAttempt();
     } while (gcd(phi, e) != 1);
     printNewLine();
   }
 
+  gmp_randclear(statep);
+
   printStep(5, "Generating private key.");
   mpz_invert(k.get_mpz_t(), e.get_mpz_t(), phi.get_mpz_t());
-
-  gmp_randclear(state);
 
   // store into files (make functions later)
   printStep(6, "Saving keys to files.");
