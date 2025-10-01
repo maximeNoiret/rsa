@@ -31,6 +31,7 @@ lol no, use WSL or, better yet, install Linux.
 
 ## Features
 - Supports up to 16384-bit keys (maybe more)
+- Parallel prime generation
 - PKCS#1 v1.5 padding
 - File chunking for large messages
 - Proper key generation with 65537 as default public exponent

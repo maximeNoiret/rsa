@@ -3,9 +3,6 @@
 #include <gmpxx.h>
 #include <thread>
 
-#include <iostream> // used for debug, will be removed.
-#include <iomanip>
-
 #include "rsa.h"
 #include "terminalManagement.h"
 
@@ -40,11 +37,12 @@ string mpz_to_string(const mpz_class &num) {
   return result;
 }
 
-void generatePrime(mpz_class &x, const unsigned &bits, gmp_randstate_t &state) {
+void generatePrime(mpz_class &x, const unsigned &bits, gmp_randstate_t &state, const char name) {
   mpz_urandomb(x.get_mpz_t(), state, bits);
   mpz_setbit(x.get_mpz_t(), bits - 1);  // ensure high bit set
   mpz_setbit(x.get_mpz_t(), 0);         // ensure odd
   mpz_nextprime(x.get_mpz_t(), x.get_mpz_t());
+  printFound(name);
 }
 
 // PS: might place each large section into its own function. dunno
@@ -59,8 +57,8 @@ void generateKeys(const unsigned &bits, const string &filename) {
   gmp_randseed_ui(stateq, time(NULL) + 12345);
 
   printStep(2, "Generating random primes.");
-  thread tp(generatePrime, ref(p), ref(bits), ref(statep));
-  thread tq(generatePrime, ref(q), ref(bits), ref(stateq));
+  thread tp(generatePrime, ref(p), ref(bits), ref(statep), 'p');
+  thread tq(generatePrime, ref(q), ref(bits), ref(stateq), 'q');
 
   tp.join();
   tq.join();

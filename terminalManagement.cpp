@@ -80,6 +80,10 @@ void printStep(const unsigned &step, const string &message) {
   cout << setw(3) << right << step << setw(3) << left << '.' << message << '\n';
 }
 
+void printFound(const char name) {
+  cout << "\t- Prime " << name << " found!" << endl;
+}
+
 void printVeryRareEvent() {
   cout << "Something very rare happened!" << '\n'
        << "Exponent (65537) wasn't prime with phi of n!" << '\n'
