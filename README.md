@@ -5,12 +5,15 @@ RSA encryption implementation to practice it idk
 ## Requirements
 - Linux/macOS
 - GMP library
+  - Arch/Alpine: ``gmp``
+  - Debian/Ubuntu: ``libgmp-dev``
 - C++17 compiler
 
 ## Installation
+### From Source
 ```bash
-sudo pacman -S gmp
-
+git clone https://github.com/maximeNoiret/rsa
+cd rsa
 make
 ```
 
