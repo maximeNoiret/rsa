@@ -102,5 +102,7 @@ void printFileError(const string &filename) {
 void printMessage(const string &message) { cout << message << '\n'; }
 
 void getFromSTDIN(string &input) {
-  getline(cin, input);
+  ostringstream oss;
+  oss << std::cin.rdbuf();
+  input = oss.str();
 }
