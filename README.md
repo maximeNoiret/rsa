@@ -40,4 +40,4 @@ lol no, use WSL or, better yet, install Linux.
 - Proper key generation with 65537 as default public exponent
 
 ## Note
-This is a learning project. Don't use this for anything important unless you enjoy living dangerously.
+This is a learning project. Don't use this for anything important unless you're an idiot. I'm not responsible if you get bommed.
