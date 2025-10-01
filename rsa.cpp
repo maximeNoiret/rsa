@@ -1,7 +1,13 @@
-#include "terminalManagement.h"
 #include <fstream>
 #include <gmp.h>
 #include <gmpxx.h>
+
+#include <iostream> // used for debug, will be removed.
+#include <iomanip>
+
+#include "rsa.h"
+#include "terminalManagement.h"
+
 
 using namespace std;
 
@@ -104,8 +110,12 @@ bool loadKeys(mpz_class &n, mpz_class &x, const string &filename) {
   return true;
 }
 
+size_t byteLength(const mpz_class &n) {
+    return (mpz_sizeinbase(n.get_mpz_t(), 2) + 7) / 8;
+}
+
 int encrypt(const string &filename, string message){
-  mpz_class n, e, m, r;
+  mpz_class n, e;
   if (!loadKeys(n, e, filename))
     return 1;
 
@@ -113,11 +123,36 @@ int encrypt(const string &filename, string message){
     getFromSTDIN(message);
   }
 
-  m = string_to_mpz(message);
-  mpz_powm(r.get_mpz_t(), m.get_mpz_t(), e.get_mpz_t(), n.get_mpz_t());
-  printMessage(r.get_str(16));
+  const size_t byteLen = byteLength(n);
+  const size_t maxClen = byteLen - PAD_LEN;  // max chunk length
+  string cipher;
+  
+  for (size_t i = 0; i < message.size(); i += maxClen) {
+    size_t cLen = min(maxClen, message.size() - i);  // current chunk length
+    string chunk = message.substr(i, cLen);  // extract chunk
+    
+    // build EB (00 01 PS 00 DATA)
+    string eb;
+    eb.reserve(byteLen);
+    eb.push_back(0x00);
+    eb.push_back(0x01);
+    eb.append(byteLen - 3 - cLen, 0xFF);  // PS
+    eb.push_back(0x00);
+    eb.append(chunk);
 
+    mpz_class m = string_to_mpz(eb), r;
+    mpz_powm(r.get_mpz_t(), m.get_mpz_t(), e.get_mpz_t(), n.get_mpz_t());
+
+    string hexStr = r.get_str(16);
+    size_t expectedLen = byteLen * 2;  // 2 hex chars per byte
+    if (hexStr.size() < expectedLen)
+      hexStr.insert(0, expectedLen - hexStr.size(), '0');
+    cipher += hexStr + SEPARATOR;
+  }
+  cipher.pop_back(); // remove trailing separator
+  printMessage(cipher);
   return 0;
+
 }
 
 int decrypt(const string &filename, string cipher) {
@@ -129,9 +164,58 @@ int decrypt(const string &filename, string cipher) {
     getFromSTDIN(cipher);
   }
 
-  c.set_str(cipher, 16);
-  mpz_powm(r.get_mpz_t(), c.get_mpz_t(), k.get_mpz_t(), n.get_mpz_t());
-  printMessage(mpz_to_string(r));
+  const size_t byteLen = byteLength(n);
+  string message;
+
+  for (size_t pos = 0; pos < cipher.size();) {
+    size_t next = cipher.find(SEPARATOR, pos);  // find next separator
+    if (next == string::npos) next = cipher.size();
+
+    string chunk = cipher.substr(pos, next - pos);
+    pos = next + 1;
+
+    mpz_class c, r;
+    c.set_str(chunk, 16);
+    mpz_powm(r.get_mpz_t(), c.get_mpz_t(), k.get_mpz_t(), n.get_mpz_t());
+
+    string hexStr = r.get_str(16);
+    size_t expectedLen = byteLen * 2;
+    if (hexStr.size() < expectedLen) {
+      hexStr.insert(0, expectedLen - hexStr.size(), '0');
+    }
+
+    if (hexStr.size() < expectedLen) {
+      hexStr.insert(0, expectedLen - hexStr.size(), '0');
+    }
+
+    string eb;
+    for (size_t i = 0; i < hexStr.size(); i += 2) {
+      eb.push_back((char)stoi(hexStr.substr(i, 2), nullptr, 16));
+    }
+
+    // padding check
+    if (eb.size() != byteLen)
+      throw runtime_error("bad block: eb size not byteLen");
+    if ((unsigned char)eb[0] != 0x00)
+      throw runtime_error("bad block: first element not 0x00");
+    if ((unsigned char)eb[1] != 0x01)
+      throw runtime_error("bad block: second element isn't 0x01");
+
+    size_t idx = 2;
+    // look for 00 after PS
+    for (;idx < eb.size() && (unsigned char)eb[idx] != 0x00; ++idx);
+    if (idx >= eb.size() || (unsigned char)eb[idx] != 0x00) {
+      throw runtime_error("bad padding: no separator found after PS");
+    }
+
+    if (idx < 10) {  // PS must be at least 8 bytes (so idx >= 10)
+      throw runtime_error("bad padding: PS too short");
+    }
+
+    message += eb.substr(idx + 1); // get everyting after padding
+
+  }
+  printMessage(message);
 
   return 0;
 }

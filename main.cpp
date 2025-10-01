@@ -26,6 +26,7 @@ int main(const int argc, const char **argv) {
       }
     }
     generateKeys(bits, filename);
+    return 0;
   }
   if (argv[1] == string("encrypt")) {
     if (argc < 4) {
