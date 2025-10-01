@@ -6,6 +6,7 @@ RSA encryption to practice it idk
 $ git clone https://github.com/maximeNoiret/rsa
 $ cd rsa
 $ make
-# Optional: adding it to PATH
-$ mv rsa /usr/bin
+
+Optional: adding it to PATH
+# mv rsa /usr/bin
 ```
