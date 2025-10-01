@@ -3,4 +3,8 @@
 rsa
 
 # test keys
-testing*
+key
+key.pub
+
+# tests
+testing
