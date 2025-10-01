@@ -1,5 +1,5 @@
 CXX = g++
-LDFLAGS = -lgmp -lgmpxx
+LDFLAGS = -lgmp -lgmpxx -pthread
 CXXFLAGS = -Wall -Wextra -std=c++17
 TARGET = rsa
 
