@@ -28,11 +28,19 @@ int main(const int argc, const char **argv) {
     generateKeys(bits, filename);
   }
   if (argv[1] == string("encrypt")) {
-    if (argc <= 4) {
+    if (argc < 4) {
       incorrectUsage(argv[0]);
       return 1;
     }
-    encrypt(argv[2], argv[3]);
+    return encrypt(argv[2], argv[3]);
   }
-  return 0;
+  if (argv[1] == string("decrypt")) {
+    if (argc < 4) {
+      incorrectUsage(argv[0]);
+      return 1;
+    }
+    return decrypt(argv[2], argv[3]);
+  }
+  incorrectUsage(argv[0]);
+  return 1;
 }

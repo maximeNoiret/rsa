@@ -99,4 +99,8 @@ void printFileError(const string &filename) {
   cerr << "Error: Could not open file " << filename << "\n";
 }
 
-void printCipher(const string &cipher) { cout << cipher << '\n'; }
+void printMessage(const string &message) { cout << message << '\n'; }
+
+void getFromSTDIN(string &input) {
+  getline(cin, input);
+}

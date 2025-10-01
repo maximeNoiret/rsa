@@ -37,13 +37,11 @@ string mpz_to_string(const mpz_class &num) {
 void generateKeys(const unsigned &bits, const string &filename) {
   mpz_class p, q, n, phi, e, k;
 
-  // init random
   printStep(1, "Initializing random number generator.");
   gmp_randstate_t state;
   gmp_randinit_mt(state);
   gmp_randseed_ui(state, time(NULL));
 
-  // generate large primes
   printStep(2, "Generating random primes.");
   mpz_urandomb(p.get_mpz_t(), state, bits);
   mpz_nextprime(p.get_mpz_t(), p.get_mpz_t());
@@ -51,13 +49,10 @@ void generateKeys(const unsigned &bits, const string &filename) {
   mpz_urandomb(q.get_mpz_t(), state, bits);
   mpz_nextprime(q.get_mpz_t(), q.get_mpz_t());
 
-  // modulus and phi of modulus
   printStep(3, "Calculating modulus and phi.");
   n = p * q;
   phi = (p - 1) * (q - 1);
 
-  // get public key
-  // generate e a random GCD(phi, e) = 1
   printStep(4, "Using exponent 65537.");
   e = 65537;
   if (gcd(phi, e) != 1) {
@@ -70,16 +65,12 @@ void generateKeys(const unsigned &bits, const string &filename) {
     printNewLine();
   }
 
-  // get private key
-  // generate invert of e
   printStep(5, "Generating private key.");
   mpz_invert(k.get_mpz_t(), e.get_mpz_t(), phi.get_mpz_t());
 
-  // clean up
   gmp_randclear(state);
 
-  // store into files
-  // store public key
+  // store into files (make functions later)
   printStep(6, "Saving keys to files.");
   ofstream file(filename + ".pub");
   // TODO: file checking
@@ -87,7 +78,6 @@ void generateKeys(const unsigned &bits, const string &filename) {
   file << e.get_str(16);
   file.close();
 
-  // store private key
   file.open(filename);
   // TODO: file checking
   file << n.get_str(16) << '\n';
@@ -98,28 +88,51 @@ void generateKeys(const unsigned &bits, const string &filename) {
   return;
 }
 
-void encrypt(const std::string &filename, const std::string &message){
-  // Consider making a separate functon to load keys
+bool loadKeys(mpz_class &n, mpz_class &x, const string &filename) {
   ifstream file(filename);
   if (!file.is_open()) {
     printFileError(filename);
-    return;
+    return false;
   }
 
-  mpz_class n, e, m, r;
   {string tmp;
     getline(file, tmp);
     n.set_str(tmp, 16);
     getline(file, tmp);
-    e.set_str(tmp, 16);}
+    x.set_str(tmp, 16);}
   file.close();
+  return true;
+}
+
+int encrypt(const string &filename, string message){
+  mpz_class n, e, m, r;
+  if (!loadKeys(n, e, filename))
+    return 1;
+
+  if (message == "-") {
+    getFromSTDIN(message);
+  }
 
   m = string_to_mpz(message);
   mpz_powm(r.get_mpz_t(), m.get_mpz_t(), e.get_mpz_t(), n.get_mpz_t());
-  printCipher(r.get_str(16));
+  printMessage(r.get_str(16));
 
-  return;
+  return 0;
 }
 
-void decrypt(const std::string &filename, const std::string &cipher);
+int decrypt(const string &filename, string cipher) {
+  mpz_class n, k, c, r;
+  if(!loadKeys(n, k, filename))
+    return 1;
+
+  if (cipher == "-") {
+    getFromSTDIN(cipher);
+  }
+
+  c.set_str(cipher, 16);
+  mpz_powm(r.get_mpz_t(), c.get_mpz_t(), k.get_mpz_t(), n.get_mpz_t());
+  printMessage(mpz_to_string(r));
+
+  return 0;
+}
 

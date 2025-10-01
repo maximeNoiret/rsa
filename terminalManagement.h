@@ -4,6 +4,7 @@
 #include <string>
 
 void incorrectUsage(const char *programName);
+
 void helpMenu(const int &argc, const char **argv);
 
 void printStep(const unsigned &step, const std::string &message);
@@ -18,5 +19,7 @@ void printFinishedKeygen(const std::string &filename);
 
 void printFileError(const std::string &filename);
 
-void printCipher(const std::string &cipher);
+void printMessage(const std::string &message);
+
+void getFromSTDIN(std::string &input);
 #endif
