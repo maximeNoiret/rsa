@@ -34,6 +34,7 @@ lol no, use WSL or, better yet, install Linux.
 
 ## Features
 - Supports up to 32768-bit keys (maybe more)
+  - Generating a 32768-bit key pair took ~5 hours on a Raspberry Pi 4.
 - Parallel prime generation
 - PKCS#1 v1.5 padding
 - File chunking for large messages
