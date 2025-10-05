@@ -19,7 +19,7 @@ make
 ```
 
 ### Binaries
-Compiled binaries are available in the [Releases](https://github.com/maximeNoiret/rsa/releases) tab.
+Compiled binaries are available in [here](https://github.com/maximeNoiret/rsa/releases/latest).
 > [!NOTE]
 > Binaries may not be up to date, not that it matters much. \
 > Using a compiled binary is the recommended method for Windows. idc if the executable is 3MB. \
