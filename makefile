@@ -1,6 +1,6 @@
 CXX = g++
 LDFLAGS = -lgmp -lgmpxx -pthread
-CXXFLAGS = -Wall -Wextra -std=c++17
+CXXFLAGS = -Wall -Wextra -std=c++11
 TARGET = rsa
 
 $(TARGET): main.o terminalManagement.o rsa.o
