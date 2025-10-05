@@ -10,7 +10,7 @@ RSA encryption implementation to practice it idk
 - GMP library
   - Arch/Alpine: ``gmp``
   - Debian/Ubuntu: ``libgmp-dev``
-- C++17 compiler (``g++``)
+- C++11 compiler (``g++``)
 
 ```bash
 git clone https://github.com/maximeNoiret/rsa
