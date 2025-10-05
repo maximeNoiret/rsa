@@ -2,20 +2,28 @@
 
 RSA encryption implementation to practice it idk
 
-## Requirements
-- Linux/macOS
+
+
+## Installation
+### From Source
+#### Requirements
 - GMP library
   - Arch/Alpine: ``gmp``
   - Debian/Ubuntu: ``libgmp-dev``
 - C++17 compiler (``g++``)
 
-## Installation
-### From Source
 ```bash
 git clone https://github.com/maximeNoiret/rsa
 cd rsa
 make
 ```
+
+### Binaries
+Compiled binaries are available in the [Releases](https://github.com/maximeNoiret/rsa/releases) tab.
+> [!NOTE]
+> Binaries may not be up to date, not that it matters much. \
+> Using a compiled binary is the recommended method for Windows. idc if the executable is 3MB. \
+> Also linux executables prolly won't be updated much since you can literally just build it.
 
 ## Usage
 ```bash
@@ -28,9 +36,6 @@ make
 # Decrypt
 ./rsa decrypt <keyfile> <ciphertext>
 ```
-
-## Windows Support
-lol no, use WSL or, better yet, install Linux.
 
 ## Features
 - Supports up to 32768-bit keys (maybe more)
