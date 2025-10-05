@@ -7,7 +7,13 @@ $(TARGET): main.o terminalManagement.o rsa.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cpp
-	$(CXX) $(CXXGLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm *.o $(TARGET)
+	rm -f *.o $(TARGET)
+
+uninstall:
+	rm -f /usr/local/bin/$(TARGET)
+
+install:
+	install -m 755 $(TARGET) /usr/local/bin/
