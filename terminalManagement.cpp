@@ -1,6 +1,7 @@
 #include "terminalManagement.h"
 #include <iomanip>
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
