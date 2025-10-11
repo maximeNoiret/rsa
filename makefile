@@ -7,6 +7,9 @@ OBJECTS = main.o rsa.o terminalManagement.o
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+windows: $(OBJECTS)
+	$(CXX) -static $(CXXFLAGS) -o $(TARGET).exe $^ $(LDFLAGS)
+
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
@@ -18,6 +21,3 @@ uninstall:
 
 install:
 	install -m 755 $(TARGET) /usr/local/bin/
-
-windows:
-	$(CXX) -static $(CXXFLAGS) -o $(TARGET).exe OBJECTS $(LDFLAGS)
