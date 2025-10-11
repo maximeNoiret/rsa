@@ -2,8 +2,9 @@ CXX = g++
 LDFLAGS = -lgmp -lgmpxx -pthread
 CXXFLAGS = -Wall -Wextra -std=c++11
 TARGET = rsa
+OBJECTS = main.o rsa.o terminalManagement.o 
 
-$(TARGET): main.o terminalManagement.o rsa.o
+$(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.cpp
@@ -17,3 +18,6 @@ uninstall:
 
 install:
 	install -m 755 $(TARGET) /usr/local/bin/
+
+windows:
+	$(CXX) -static $(CXXFLAGS) -o $(TARGET).exe OBJECTS $(LDFLAGS)
