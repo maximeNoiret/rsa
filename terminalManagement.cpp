@@ -1,4 +1,5 @@
 #include "terminalManagement.h"
+#include <ctime>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -82,7 +83,14 @@ void printStep(const unsigned &step, const string &message) {
 }
 
 void printFound(const char name) {
-  cout << "\t- Prime " << name << " found!" << endl;
+  time_t tt;
+  struct tm *ti;
+
+  time(&tt);
+
+  ti = localtime(&tt);
+  cout << "\t- Prime " << name << " found!" << '\n'
+       << "\tWas found on " << asctime(ti) << endl;
 }
 
 void printVeryRareEvent() {
