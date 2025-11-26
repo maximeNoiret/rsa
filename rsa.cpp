@@ -76,14 +76,37 @@ void generateKeys(const unsigned &bits, const string &filename,
   gmp_randseed_ui(stateq, time(NULL) + rand());
 
   printStep(2, "Generating random primes.");
-  // TODO: get primes from file if files exist
 
   // if file not exist, generate the prime
-  thread tp(generatePrime, ref(p), ref(bits), ref(statep), 'p', path);
-  thread tq(generatePrime, ref(q), ref(bits), ref(stateq), 'q', path);
+  ifstream primefile;
+  thread tp;
+  thread tq;
 
-  tp.join();
-  tq.join();
+  primefile.open(path + kPathSeparator + "prime_p");
+  if (!primefile.good()) {
+    tp = thread(generatePrime, ref(p), ref(bits), ref(statep), 'p', path);
+  } else {
+    string input;
+    getline(primefile, input);
+    p.set_str(input, 16);
+    printLoad(path + kPathSeparator + "prime_p", 'p');
+  }
+  primefile.close();
+  primefile.open(path + kPathSeparator + "prime_q");
+  if (!primefile.good()) {
+    tq = thread(generatePrime, ref(q), ref(bits), ref(stateq), 'q', path);
+  } else {
+    string input;
+    getline(primefile, input);
+    q.set_str(input, 16);
+    printLoad(path + kPathSeparator + "prime_q", 'q');
+  }
+  primefile.close();
+
+  if (tp.joinable())
+    tp.join();
+  if (tq.joinable())
+    tq.join();
 
   gmp_randclear(stateq);
 

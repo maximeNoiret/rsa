@@ -95,10 +95,18 @@ void printFound(const char name) {
 
   ti = localtime(&tt);
   cout << "\t- Prime " << name << " found!" << '\n'
-       << "\tWas found on " << asctime(ti) << endl;
+       << "\tWas found on " << asctime(ti);
 }
 
-void printSaved(const string path) { cout << "\t\tSaved at: " << path << endl; }
+void printSaved(const string path) {
+  cout << "\t\tSaved at: " << path << '\n' << endl;
+}
+
+void printLoad(const string path, const char name) {
+  cout << "\t- Prime " << name << " loaded." << '\n'
+       << "\t\tFrom " << path << '\n'
+       << endl;
+}
 
 void printVeryRareEvent() {
   cout << "Something very rare happened!" << '\n'
