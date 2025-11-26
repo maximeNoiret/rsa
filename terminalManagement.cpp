@@ -10,7 +10,8 @@ void incorrectUsage(const char *programName) {
   cerr << "Incorrect usage. Please include a command." << '\n'
        << "Correct usages:" << '\n'
        << '\t' << programName << " help [command]" << '\n'
-       << '\t' << programName << " keygen [bits] [output filename]" << '\n'
+       << '\t' << programName << " keygen [bits] [output filename] [prime path]"
+       << '\n'
        << '\t' << programName << " encrypt (keyfile) (message)" << '\n'
        << '\t' << programName << " decrypt (keyfile) (message)" << '\n';
 }
@@ -21,7 +22,7 @@ void helpMenu(const int &argc, const char **argv) {
          << '\n'
          << "- help [command]" << '\n'
          << '\t' << "Displays help about a command." << '\n'
-         << "- keygen [bits] [output filename]" << '\n'
+         << "- keygen [bits] [output filename] [prime save path]" << '\n'
          << '\t'
          << "Generates a keypair of [bits] bits, 512 by default, and stores "
             "them into key.pub and key by default."
@@ -48,11 +49,15 @@ void helpMenu(const int &argc, const char **argv) {
          << '\n'
          << "This command generates a pair of public and private keys." << '\n'
          << "It generates them in 2 files, key.pub and key by default." << '\n'
-         << "It has 2 arguments:" << '\n'
+         << "It has 3 arguments:" << '\n'
          << '\t' << setw(15) << left << "- [bits]"
          << "Specifies the bitwidth of the keys. Default is 512" << '\n'
          << '\t' << setw(15) << left << "- [filename]"
-         << "Specifies the output file name. Default is 'key'" << '\n';
+         << "Specifies the output file name. Default is 'key'" << '\n'
+         << '\t' << setw(15) << left << "- [prime path]"
+         << "Enables and specifies the path where the generated prime numbers "
+            "will be saved."
+         << '\n';
   } else if (argv[2] == string("encrypt")) {
     cout << "Help - encrypt" << '\n'
          << '\n'
@@ -92,6 +97,8 @@ void printFound(const char name) {
   cout << "\t- Prime " << name << " found!" << '\n'
        << "\tWas found on " << asctime(ti) << endl;
 }
+
+void printSaved(const string path) { cout << "\t\tSaved at: " << path << endl; }
 
 void printVeryRareEvent() {
   cout << "Something very rare happened!" << '\n'

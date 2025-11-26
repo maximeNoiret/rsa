@@ -10,6 +10,13 @@ using namespace std;
 
 const string primeText = "prime_";
 
+const char kPathSeparator =
+#ifdef _WIN32
+    '\\';
+#else
+    '/';
+#endif
+
 // Remove these, please for the love of everything holy find a better way.
 mpz_class string_to_mpz(const std::string &message) {
   mpz_class result = 0;
@@ -47,14 +54,17 @@ void generatePrime(mpz_class &x, const unsigned &bits, gmp_randstate_t &state,
   printFound(name);
   // store prime in case of interruption
   if (!path.empty()) {
-    ofstream prime(path + primeText + name); // this is... stupid af
+    ofstream prime(path + kPathSeparator + primeText +
+                   name); // this is... stupid af
     prime << x.get_str(16);
     prime.close();
+    printSaved(path + kPathSeparator + primeText + name);
   }
 }
 
 // PS: might place each large section into its own function. dunno
-void generateKeys(const unsigned &bits, const string &filename, const string path = "") {
+void generateKeys(const unsigned &bits, const string &filename,
+                  const string path = "") {
   mpz_class p, q, n, phi, e, k;
 
   printStep(1, "Initializing random number generator.");

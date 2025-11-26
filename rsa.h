@@ -9,7 +9,8 @@ mpz_class string_to_mpz(const std::string &message);
 
 std::string mpz_to_string(const mpz_class &num);
 
-void generateKeys(const unsigned &bits, const std::string &filename);
+void generateKeys(const unsigned &bits, const std::string &filename,
+                  const std::string path);
 
 int encrypt(const std::string &filename, std::string message);
 

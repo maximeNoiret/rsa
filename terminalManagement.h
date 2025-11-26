@@ -11,6 +11,8 @@ void printStep(const unsigned &step, const std::string &message);
 
 void printFound(const char name);
 
+void printSaved(const std::string path);
+
 void printVeryRareEvent();
 
 void showAttempt();
