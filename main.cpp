@@ -19,13 +19,17 @@ int main(const int argc, const char **argv) {
   if (argv[1] == string("keygen")) {
     unsigned bits = 512;
     string filename = "key";
+    string path = "";
     if (argc >= 3 && isdigit(argv[2][0])) {
       bits = stoul(argv[2]);
-      if (argc == 4) {
+      if (argc >= 4) {
         filename = argv[3];
+        if (argc >= 5) {
+          path = argv[4];
+        }
       }
     }
-    generateKeys(bits, filename);
+    generateKeys(bits, filename, path);
     return 0;
   }
   if (argv[1] == string("encrypt")) {
