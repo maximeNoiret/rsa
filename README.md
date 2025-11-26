@@ -28,7 +28,7 @@ Compiled binaries are available in [here](https://github.com/maximeNoiret/rsa/re
 ## Usage
 ```bash
 # Generate keys
-./rsa keygen [bits] [filename]
+./rsa keygen [bits] [filename] [prime path]
 
 # Encrypt
 ./rsa encrypt <keyfile.pub> <message>
@@ -41,7 +41,7 @@ Compiled binaries are available in [here](https://github.com/maximeNoiret/rsa/re
 - Supports up to 65536-bit keys (maybe more)
   - Generating a 32768-bit key pair took ~5 hours on a Raspberry Pi 4.
   - Generating a 65536-bit key pair took ~4 days on a Raspberry Pi 4.
-- Parallel prime generation
+- Parallel prime generation/loading from file
 - PKCS#1 v1.5 padding
 - File chunking for large messages
 - Proper key generation with 65537 as default public exponent
