@@ -39,20 +39,22 @@ string mpz_to_string(const mpz_class &num) {
 }
 
 void generatePrime(mpz_class &x, const unsigned &bits, gmp_randstate_t &state,
-                   const char name) {
+                   const char name, const string path = "") {
   mpz_urandomb(x.get_mpz_t(), state, bits);
   mpz_setbit(x.get_mpz_t(), bits - 1); // ensure high bit set
   mpz_setbit(x.get_mpz_t(), 0);        // ensure odd
   mpz_nextprime(x.get_mpz_t(), x.get_mpz_t());
   printFound(name);
   // store prime in case of interruption
-  ofstream prime(primeText + name); // this is... stupid af
-  prime << x.get_str(16);
-  prime.close();
+  if (!path.empty()) {
+    ofstream prime(path + primeText + name); // this is... stupid af
+    prime << x.get_str(16);
+    prime.close();
+  }
 }
 
 // PS: might place each large section into its own function. dunno
-void generateKeys(const unsigned &bits, const string &filename) {
+void generateKeys(const unsigned &bits, const string &filename, const string path = "") {
   mpz_class p, q, n, phi, e, k;
 
   printStep(1, "Initializing random number generator.");
@@ -67,8 +69,8 @@ void generateKeys(const unsigned &bits, const string &filename) {
   // TODO: get primes from file if files exist
 
   // if file not exist, generate the prime
-  thread tp(generatePrime, ref(p), ref(bits), ref(statep), 'p');
-  thread tq(generatePrime, ref(q), ref(bits), ref(stateq), 'q');
+  thread tp(generatePrime, ref(p), ref(bits), ref(statep), 'p', path);
+  thread tq(generatePrime, ref(q), ref(bits), ref(stateq), 'q', path);
 
   tp.join();
   tq.join();
