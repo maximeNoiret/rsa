@@ -6,8 +6,9 @@
 #include "rsa.h"
 #include "terminalManagement.h"
 
-
 using namespace std;
+
+const string primeText = "prime_";
 
 // Remove these, please for the love of everything holy find a better way.
 mpz_class string_to_mpz(const std::string &message) {
@@ -37,12 +38,17 @@ string mpz_to_string(const mpz_class &num) {
   return result;
 }
 
-void generatePrime(mpz_class &x, const unsigned &bits, gmp_randstate_t &state, const char name) {
+void generatePrime(mpz_class &x, const unsigned &bits, gmp_randstate_t &state,
+                   const char name) {
   mpz_urandomb(x.get_mpz_t(), state, bits);
-  mpz_setbit(x.get_mpz_t(), bits - 1);  // ensure high bit set
-  mpz_setbit(x.get_mpz_t(), 0);         // ensure odd
+  mpz_setbit(x.get_mpz_t(), bits - 1); // ensure high bit set
+  mpz_setbit(x.get_mpz_t(), 0);        // ensure odd
   mpz_nextprime(x.get_mpz_t(), x.get_mpz_t());
   printFound(name);
+  // store prime in case of interruption
+  ofstream prime(primeText + name); // this is... stupid af
+  prime << x.get_str(16);
+  prime.close();
 }
 
 // PS: might place each large section into its own function. dunno
@@ -54,15 +60,18 @@ void generateKeys(const unsigned &bits, const string &filename) {
   gmp_randinit_mt(statep);
   gmp_randinit_mt(stateq);
   gmp_randseed_ui(statep, time(NULL));
-  gmp_randseed_ui(stateq, time(NULL) + 12345);
+  srand(time(NULL));
+  gmp_randseed_ui(stateq, time(NULL) + rand());
 
   printStep(2, "Generating random primes.");
+  // TODO: get primes from file if files exist
+
+  // if file not exist, generate the prime
   thread tp(generatePrime, ref(p), ref(bits), ref(statep), 'p');
   thread tq(generatePrime, ref(q), ref(bits), ref(stateq), 'q');
 
   tp.join();
   tq.join();
-  
 
   gmp_randclear(stateq);
 
@@ -76,7 +85,8 @@ void generateKeys(const unsigned &bits, const string &filename) {
     printVeryRareEvent();
     do {
       mpz_urandomb(e.get_mpz_t(), statep, 17);
-      if (e % 2 == 0) ++e;
+      if (e % 2 == 0)
+        ++e;
       showAttempt();
     } while (gcd(phi, e) != 1);
     printNewLine();
@@ -90,13 +100,19 @@ void generateKeys(const unsigned &bits, const string &filename) {
   // store into files (make functions later)
   printStep(6, "Saving keys to files.");
   ofstream file(filename + ".pub");
-  // TODO: file checking
+  if (!file) {
+    printFileError(filename + ".pub");
+    return;
+  }
   file << n.get_str(16) << '\n';
   file << e.get_str(16);
   file.close();
 
   file.open(filename);
-  // TODO: file checking
+  if (!file) {
+    printFileError(filename);
+    return;
+  }
   file << n.get_str(16) << '\n';
   file << k.get_str(16);
   file.close();
@@ -112,20 +128,22 @@ bool loadKeys(mpz_class &n, mpz_class &x, const string &filename) {
     return false;
   }
 
-  {string tmp;
+  {
+    string tmp;
     getline(file, tmp);
     n.set_str(tmp, 16);
     getline(file, tmp);
-    x.set_str(tmp, 16);}
+    x.set_str(tmp, 16);
+  }
   file.close();
   return true;
 }
 
 size_t byteLength(const mpz_class &n) {
-    return (mpz_sizeinbase(n.get_mpz_t(), 2) + 7) / 8;
+  return (mpz_sizeinbase(n.get_mpz_t(), 2) + 7) / 8;
 }
 
-int encrypt(const string &filename, string message){
+int encrypt(const string &filename, string message) {
   mpz_class n, e;
   if (!loadKeys(n, e, filename))
     return 1;
@@ -135,19 +153,20 @@ int encrypt(const string &filename, string message){
   }
 
   const size_t byteLen = byteLength(n);
-  const size_t maxClen = byteLen - PAD_LEN;  // max chunk length
+  const size_t maxClen = byteLen - PAD_LEN; // max chunk length
   string cipher;
-  
+
   for (size_t i = 0; i < message.size(); i += maxClen) {
-    size_t cLen = min(maxClen, message.size() - i);  // current chunk length
-    string chunk = message.substr(i, cLen);  // extract chunk
-    
+    size_t cLen = min(maxClen, message.size() - i); // current chunk length
+    string chunk = message.substr(i, cLen);         // extract chunk
+
+    // uh... push_back even though we reserve? need to check on that
     // build EB (00 01 PS 00 DATA)
     string eb;
     eb.reserve(byteLen);
     eb.push_back(0x00);
     eb.push_back(0x01);
-    eb.append(byteLen - 3 - cLen, 0xFF);  // PS
+    eb.append(byteLen - 3 - cLen, 0xFF); // PS
     eb.push_back(0x00);
     eb.append(chunk);
 
@@ -155,7 +174,7 @@ int encrypt(const string &filename, string message){
     mpz_powm(r.get_mpz_t(), m.get_mpz_t(), e.get_mpz_t(), n.get_mpz_t());
 
     string hexStr = r.get_str(16);
-    size_t expectedLen = byteLen * 2;  // 2 hex chars per byte
+    size_t expectedLen = byteLen * 2; // 2 hex chars per byte
     if (hexStr.size() < expectedLen)
       hexStr.insert(0, expectedLen - hexStr.size(), '0');
     cipher += hexStr + SEPARATOR;
@@ -163,14 +182,14 @@ int encrypt(const string &filename, string message){
   cipher.pop_back(); // remove trailing separator
   printMessage(cipher);
   return 0;
-
 }
 
 int decrypt(const string &filename, string cipher) {
   mpz_class n, k, c, r;
-  if(!loadKeys(n, k, filename))
+  if (!loadKeys(n, k, filename))
     return 1;
 
+  // piping
   if (cipher == "-") {
     getFromSTDIN(cipher);
   }
@@ -179,8 +198,9 @@ int decrypt(const string &filename, string cipher) {
   string message;
 
   for (size_t pos = 0; pos < cipher.size();) {
-    size_t next = cipher.find(SEPARATOR, pos);  // find next separator
-    if (next == string::npos) next = cipher.size();
+    size_t next = cipher.find(SEPARATOR, pos); // find next separator
+    if (next == string::npos)
+      next = cipher.size();
 
     string chunk = cipher.substr(pos, next - pos);
     pos = next + 1;
@@ -214,20 +234,19 @@ int decrypt(const string &filename, string cipher) {
 
     size_t idx = 2;
     // look for 00 after PS
-    for (;idx < eb.size() && (unsigned char)eb[idx] != 0x00; ++idx);
+    for (; idx < eb.size() && (unsigned char)eb[idx] != 0x00; ++idx)
+      ;
     if (idx >= eb.size() || (unsigned char)eb[idx] != 0x00) {
       throw runtime_error("bad padding: no separator found after PS");
     }
 
-    if (idx < 10) {  // PS must be at least 8 bytes (so idx >= 10)
+    if (idx < 10) { // PS must be at least 8 bytes (so idx >= 10)
       throw runtime_error("bad padding: PS too short");
     }
 
     message += eb.substr(idx + 1); // get everyting after padding
-
   }
   printMessage(message);
 
   return 0;
 }
-
