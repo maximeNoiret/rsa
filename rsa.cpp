@@ -17,7 +17,9 @@ const char kPathSeparator =
     '/';
 #endif
 
-// Remove these, please for the love of everything holy find a better way.
+// for every char in message:
+//     message = message shifted left by 1 char + current char.
+//     We "insert" every character at the end of the mpz message.
 mpz_class string_to_mpz(const std::string &message) {
   mpz_class result = 0;
   for (size_t i = 0; i < message.size(); ++i) {
@@ -27,6 +29,9 @@ mpz_class string_to_mpz(const std::string &message) {
   return result;
 }
 
+// ngl, I have no idea what's happening here but it works.
+// I think we divide by 256 (1 byte) to obtain the char (remainder)
+// And we do this until temp = 0 (no chars left)
 string mpz_to_string(const mpz_class &num) {
   if (num == 0)
     return string(1, '\0');
